@@ -1,0 +1,11 @@
+services:
+  telegram-bot:
+    build: .
+    container_name: telegram-auto-like-bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./sessions:/app/sessions
+    environment:
+      - PYTHONUNBUFFERED=1
