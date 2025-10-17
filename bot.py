@@ -1,5 +1,6 @@
 """
 Professional Telegram User Bot with safety protections
+Monitors specific topic/thread in a group chat
 """
 import asyncio
 import random
@@ -46,8 +47,8 @@ app = Client(
     phone_number=Config.PHONE,
     workdir=str(Path(Config.SESSION_PATH).parent),
     sleep_threshold=Config.REQUEST_TIMEOUT,
-    no_updates=False,  # Enable updates
-    take_out=False,  # Don't use takeout
+    no_updates=False,
+    take_out=False,
 )
 
 
@@ -102,14 +103,27 @@ async def send_reaction(message_id: int, emoji: str) -> bool:
         return False
 
 
-@app.on_message(filters.group & filters.incoming)
+@app.on_message(
+    filters.group
+    & filters.incoming
+    & filters.chat(Config.CHAT_ID)
+)
 async def handle_message(client: Client, message):
     """
-    Handle incoming messages with full validation
+    Handle incoming messages in specific topic/thread only
     """
     try:
         # Safety: Skip own messages
         if message.from_user and message.from_user.is_self:
+            return
+
+        # NEW: Check if message is in the specific topic
+        # message.topic_id is the topic ID (None for main chat, number for topics)
+        if message.topic_id != Config.TOPIC_ID:
+            logger.debug(
+                f"⏭️  Message {message.id} is in topic {message.topic_id}, "
+                f"but we're monitoring topic {Config.TOPIC_ID}"
+            )
             return
 
         # Safety: Check user ID
@@ -125,9 +139,9 @@ async def handle_message(client: Client, message):
             return
 
         logger.info(
-            f"✨ New message detected!\n"
+            f"✨ New message detected in topic {Config.TOPIC_ID}!\n"
             f"   From: {message.from_user.first_name} ({sender_id})\n"
-            f"   ID: {message.id}\n"
+            f"   Message ID: {message.id}\n"
             f"   Text: {message_text[:50]}..."
         )
 
@@ -176,6 +190,7 @@ async def start_bot():
     try:
         logger.info("🚀 Starting Telegram User Bot...")
         logger.info(f"   Chat ID: {Config.CHAT_ID}")
+        logger.info(f"   Topic ID: {Config.TOPIC_ID} (messages only from this topic)")
         logger.info(f"   Allowed users: {Config.ALLOWED_USER_IDS}")
         logger.info(f"   Keywords: {len(Config.KEYWORDS)} keywords loaded")
         logger.info(f"   Reactions: {', '.join(Config.REACTIONS)}")
@@ -193,7 +208,7 @@ async def start_bot():
         health_task = asyncio.create_task(health_check())
 
         # Keep running
-        logger.info("🔔 Waiting for messages...")
+        logger.info(f"🔔 Waiting for messages in topic {Config.TOPIC_ID}...")
         await app.run_until_disconnected()
 
     except SessionPasswordNeeded:

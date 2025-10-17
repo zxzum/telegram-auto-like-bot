@@ -18,6 +18,7 @@ class Config:
 
     # Chat settings
     CHAT_ID: int = int(os.getenv('TELEGRAM_CHAT_ID', '0'))
+    TOPIC_ID: int = int(os.getenv('TELEGRAM_TOPIC_ID', '0'))  # NEW: Topic/Thread ID
     ALLOWED_USER_IDS: List[int] = [
         int(uid.strip()) for uid in os.getenv('ALLOWED_USER_IDS', '').split(',')
         if uid.strip()
@@ -81,6 +82,9 @@ class Config:
 
         if not Config.CHAT_ID or Config.CHAT_ID == 0:
             errors.append("TELEGRAM_CHAT_ID is not set or invalid")
+
+        if not Config.TOPIC_ID or Config.TOPIC_ID == 0:
+            errors.append("TELEGRAM_TOPIC_ID is not set or invalid (get from link like https://t.me/c/2584565460/2683)")
 
         if not Config.ALLOWED_USER_IDS:
             errors.append("ALLOWED_USER_IDS is not set or empty")
