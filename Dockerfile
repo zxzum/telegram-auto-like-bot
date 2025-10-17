@@ -2,15 +2,27 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Создаём директорию для сессий
-RUN mkdir -p /app/sessions
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    && rm -rf /var/lib/apt/lists/*
 
-# Копируем requirements и устанавливаем зависимости
+# Create necessary directories
+RUN mkdir -p /app/sessions /app/logs
+
+# Copy requirements
 COPY requirements.txt .
+
+# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Копируем код бота
-COPY main.py .
+# Copy application code
+COPY bot.py config.py .
+COPY utils/ utils/
 
-# Запускаем бота
-CMD ["python", "main.py"]
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# Run bot
+CMD ["python", "bot.py"]
