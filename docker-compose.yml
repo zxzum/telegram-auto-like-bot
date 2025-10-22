@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  userbot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      # Mount the session file for persistence
+      - ./sessions:/app/sessions
+    environment:
+      - SESSION_NAME=/app/sessions/userbot
+    env_file:
+      - .env
+    restart: unless-stopped
