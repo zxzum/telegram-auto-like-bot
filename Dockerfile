@@ -10,6 +10,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy source code
 COPY src/ ./src/
 
+# ✅ КОПИРОВАТЬ ПАПКУ С МОДЕЛЬЮ
+COPY models/ ./models/
+
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/app

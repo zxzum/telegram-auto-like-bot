@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   userbot:
     build:
@@ -8,6 +6,8 @@ services:
     volumes:
       # Mount the session file for persistence
       - ./sessions:/app/sessions
+      # ✅ ДОБАВИТЬ ПАПКУ С МОДЕЛЬЮ
+      - ./models:/app/models
     environment:
       - SESSION_NAME=/app/sessions/userbot
     env_file:
